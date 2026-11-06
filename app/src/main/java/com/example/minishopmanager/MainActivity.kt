@@ -20,6 +20,14 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
+        val btnPays = findViewById<Button>(R.id.btnPays)
+        btnPays.setOnClickListener {
+            startActivity(Intent(this, ListePaysActivity::class.java))
+        }
+        val btnCatalogue = findViewById<Button>(R.id.btnCatalogue)
+        btnCatalogue.setOnClickListener {
+            startActivity(Intent(this, CatalogueActivity::class.java))
+        }
 
         Log.d("LIFECYCLE", "onCreate appelé")
     }
