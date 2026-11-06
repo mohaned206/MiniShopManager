@@ -1,0 +1,9 @@
+{
+  "produits": [
+    {"nom": "Clavier sans fil", "prix": 45.0},
+    {"nom": "Souris gaming", "prix": 60.0},
+    {"nom": "Écouteurs Bluetooth", "prix": 80.0},
+    {"nom": "Clé USB 64 Go", "prix": 25.0},
+    {"nom": "Webcam HD", "prix": 90.0}
+  ]
+}
