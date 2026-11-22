@@ -1,55 +1,94 @@
 package com.example.myapplicationminishopmanager
-import android.content.ContentValues
-import android.os.Bundle
-import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
-import org.json.JSONObject
 
-data class Produit(val nom: String, val prix: Double)
+import android.content.Intent
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.EditText
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class CatalogueActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_catalogue)
+        title = "Catalogue"
 
-        val listView = findViewById<ListView>(R.id.listViewProduits)
-        val produits = lireProduitsDepuisJSON()
+        val json = assets.open("produits.json").bufferedReader().use { it.readText() }
+        val type = object : TypeToken<List<Produit>>() {}.type
+        val tous: List<Produit> = Gson().fromJson(json, type)
 
-        // Texte affiché : "Nom - prix DT"
-        val affichage = produits.map { "${it.nom} - ${it.prix} DT" }
-        listView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, affichage)
+        val tvVide = findViewById<TextView>(R.id.tvVide)
 
-        listView.setOnItemClickListener { _, _, position, _ ->
-            val produit = produits[position]
-
-            val values = ContentValues().apply {
-                put("nom", produit.nom)
-                put("prix", produit.prix)
-            }
-
-            val db = DBHelper(this).writableDatabase
-            val resultat = db.insert("panier", null, values)
-            db.close()
-
-            if (resultat != -1L) {
-                Toast.makeText(this, "${produit.nom} ajouté au panier", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Erreur lors de l'ajout", Toast.LENGTH_SHORT).show()
-            }
+        val produitAdapter = ProduitAdapter(tous) { p ->
+            val i = Intent(this, DetailActivity::class.java)
+            i.putExtra("nom", p.nom)
+            i.putExtra("prix", p.prix)
+            i.putExtra("image", p.image)
+            i.putExtra("description", p.description)
+            startActivity(i)
         }
+
+        val recycler = findViewById<RecyclerView>(R.id.recyclerView)
+        recycler.layoutManager = LinearLayoutManager(this)
+        recycler.adapter = produitAdapter
+
+        findViewById<EditText>(R.id.etRecherche).addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val q = s.toString().trim()
+                val resultat = tous.filter { it.nom.contains(q, ignoreCase = true) }
+                produitAdapter.filtrer(resultat)
+                tvVide.visibility = if (resultat.isEmpty()) View.VISIBLE else View.GONE
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
     }
 
-    private fun lireProduitsDepuisJSON(): List<Produit> {
-        val liste = ArrayList<Produit>()
-        val jsonString = assets.open("produits.json")
-            .bufferedReader().use { it.readText() }
+    override fun onResume() {
+        super.onResume()
+        invalidateOptionsMenu()
+    }
 
-        val tableau = JSONObject(jsonString).getJSONArray("produits")
-        for (i in 0 until tableau.length()) {
-            val p = tableau.getJSONObject(i)
-            liste.add(Produit(p.getString("nom"), p.getDouble("prix")))
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_catalogue, menu)
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.action_panier)?.title = "Panier (${Panier.nombreArticles()})"
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_panier -> {
+                startActivity(Intent(this, PanierActivity::class.java))
+                true
+            }
+            R.id.action_logout -> {
+                AlertDialog.Builder(this)
+                    .setTitle("Déconnexion")
+                    .setMessage("Voulez-vous vraiment vous déconnecter ?")
+                    .setPositiveButton("Oui") { _, _ ->
+                        Panier.vider()
+                        startActivity(Intent(this, LoginActivity::class.java))
+                        finish()
+                    }
+                    .setNegativeButton("Annuler", null)
+                    .show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-        return liste
     }
 }

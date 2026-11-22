@@ -1,9 +1,8 @@
-{
-  "produits": [
-    {"nom": "Clavier sans fil", "prix": 45.0},
-    {"nom": "Souris gaming", "prix": 60.0},
-    {"nom": "Écouteurs Bluetooth", "prix": 80.0},
-    {"nom": "Clé USB 64 Go", "prix": 25.0},
-    {"nom": "Webcam HD", "prix": 90.0}
-  ]
-}
+[
+  {"nom": "Téléphone", "prix": 1200.0, "image": "telephone", "description": "Smartphone 128 Go, écran AMOLED"},
+  {"nom": "Casque Bluetooth", "prix": 150.0, "image": "casque", "description": "Autonomie 30h, réduction de bruit"},
+  {"nom": "Montre connectée", "prix": 300.0, "image": "montre", "description": "Suivi sportif et notifications"},
+  {"nom": "Chargeur USB", "prix": 35.0, "image": "chargeur", "description": "Charge rapide 20W"},
+  {"nom": "Accessoires", "prix": 20.0, "image": "accessoires", "description": "Coques et câbles"},
+  {"nom": "Cosmétiques", "prix": 45.0, "image": "cosmetiques", "description": "Soins du visage"}
+]

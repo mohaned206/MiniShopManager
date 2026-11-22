@@ -1,46 +1,48 @@
 package com.example.myapplicationminishopmanager
+
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var prefs: SharedPreferences
+    private lateinit var db: DBHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        supportActionBar?.hide()
 
+        db = DBHelper(this)
         val etUser = findViewById<EditText>(R.id.etUser)
-        val cbRemember = findViewById<CheckBox>(R.id.cbRemember)
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
+        val etPass = findViewById<EditText>(R.id.etPass)
 
-        prefs = getSharedPreferences("ShopPrefs", MODE_PRIVATE)
-
-        // Pré-remplir si "Se souvenir de moi" était coché
-        etUser.setText(prefs.getString("USER", ""))
-        cbRemember.isChecked = prefs.getBoolean("REMEMBER", false)
-
-        btnLogin.setOnClickListener {
-            val user = etUser.text.toString().trim()
-            if (user.isEmpty()) {
-                etUser.error = "Champ obligatoire"
-                return@setOnClickListener
-            }
-
-            val editor = prefs.edit()
-            if (cbRemember.isChecked) {
-                editor.putString("USER", user)
-                editor.putBoolean("REMEMBER", true)
+        findViewById<Button>(R.id.btnLogin).setOnClickListener {
+            val u = etUser.text.toString().trim()
+            val p = etPass.text.toString().trim()
+            if (u.isEmpty() || p.isEmpty()) {
+                Toast.makeText(this, "Remplis tous les champs", Toast.LENGTH_SHORT).show()
+            } else if (db.login(u, p)) {
+                startActivity(Intent(this, CatalogueActivity::class.java))
+                finish()
             } else {
-                editor.clear()
+                Toast.makeText(this, "Identifiants incorrects", Toast.LENGTH_SHORT).show()
             }
-            editor.apply()
+        }
 
-            startActivity(Intent(this, CatalogueActivity::class.java))
-            finish()
+        findViewById<Button>(R.id.btnRegister).setOnClickListener {
+            val u = etUser.text.toString().trim()
+            val p = etPass.text.toString().trim()
+            if (u.isEmpty() || p.isEmpty()) {
+                Toast.makeText(this, "Remplis tous les champs", Toast.LENGTH_SHORT).show()
+            } else if (db.register(u, p)) {
+                Toast.makeText(this, "Compte créé, connecte-toi", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Nom d'utilisateur déjà utilisé", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

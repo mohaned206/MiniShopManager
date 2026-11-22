@@ -22,10 +22,9 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".CatalogueActivity"
-            android:exported="false" />
-
+        <activity android:name=".CatalogueActivity" android:exported="false" />
+        <activity android:name=".DetailActivity" android:exported="false" />
+        <activity android:name=".PanierActivity" android:exported="false" />
     </application>
 
 </manifest>
